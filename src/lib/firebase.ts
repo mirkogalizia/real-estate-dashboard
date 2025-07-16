@@ -1,5 +1,6 @@
 // src/lib/firebase.ts
 import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
@@ -12,6 +13,14 @@ const firebaseConfig = {
   measurementId:      process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID!,
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Export Firestore client instance
+export const db = getFirestore(app);
+
+// Export analytics instance (optional)
 export const analytics = getAnalytics(app);
+
+// Default export the Firebase App
 export default app;
