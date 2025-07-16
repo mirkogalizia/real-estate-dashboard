@@ -1,6 +1,6 @@
 // src/lib/firebase.ts
 import { initializeApp } from 'firebase/app';
-import { getAnalytics } from 'firebase/analytics';
+// import { getAnalytics } from 'firebase/analytics'; // analytics removed for SSR compatibility
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
@@ -23,8 +23,8 @@ export const db = getFirestore(app);
 // Export Auth client instance
 export const auth = getAuth(app);
 
-// Export analytics instance (optional)
-export const analytics = getAnalytics(app);
+// Analytics SDK removed to avoid SSR issues
 
 // Default export the Firebase App
 export default app;
+
