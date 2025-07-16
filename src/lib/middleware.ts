@@ -1,6 +1,6 @@
-// src/lib/middleware.ts
+// File: src/lib/middleware.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { adminAuth } from '@/lib/firebaseAdmin';
+import { adminAuth } from './firebaseAdmin';
 
 export async function verifyIdToken(req: NextApiRequest, res: NextApiResponse) {
   const authHeader = req.headers.authorization;
@@ -10,8 +10,7 @@ export async function verifyIdToken(req: NextApiRequest, res: NextApiResponse) {
   }
   const idToken = authHeader.split('Bearer ')[1];
   try {
-    const decoded = await adminAuth.verifyIdToken(idToken);
-    return decoded;
+    return await adminAuth.verifyIdToken(idToken);
   } catch {
     res.status(401).end('Unauthorized');
     return null;

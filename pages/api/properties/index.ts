@@ -1,7 +1,7 @@
-// pages/api/properties/index.ts
+// File: pages/api/properties/index.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { adminDb } from '@/lib/firebaseAdmin';
-import { verifyIdToken } from '@/lib/middleware';
+import { adminDb } from '../../../src/lib/firebaseAdmin';
+import { verifyIdToken } from '../../../src/lib/middleware';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const user = await verifyIdToken(req, res);
@@ -11,7 +11,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const collectionRef = adminDb.collection('properties');
 
   if (method === 'GET') {
-    // Se passi ?ownerId=… filtra per ownerId, altrimenti restituisci tutti (o aggiusta secondo le tue regole)
     let q = collectionRef.orderBy('createdAt', 'desc');
     if (query.ownerId) {
       q = q.where('ownerId', '==', String(query.ownerId));
@@ -48,3 +47,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   res.setHeader('Allow', ['GET','POST','DELETE']);
   res.status(405).end(`Method ${method} Not Allowed`);
 }
+

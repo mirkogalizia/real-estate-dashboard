@@ -1,6 +1,6 @@
-// pages/api/test-firestore.ts
+// File: pages/api/test-firestore.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { adminDb } from '../../../src/lib/firebaseAdmin';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
