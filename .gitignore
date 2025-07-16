@@ -39,3 +39,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+/airbnb-3cb50-firebase-adminsdk-fbsvc-504ab1e523.json
