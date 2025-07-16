@@ -11,8 +11,5 @@ if (!admin.apps.length) {
   });
 }
 
-// Firestore database
 export const adminDb = admin.firestore();
-
-// Auth service
 export const adminAuth = admin.auth();
