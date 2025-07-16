@@ -1,15 +1,17 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { adminAuth } from './firebaseAdmin';
+// src/lib/middleware.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { adminAuth } from '@/lib/firebaseAdmin';
 
 export async function verifyIdToken(req: NextApiRequest, res: NextApiResponse) {
-  const h = req.headers.authorization;
-  if (!h?.startsWith('Bearer ')) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
     res.status(401).end('Unauthorized');
     return null;
   }
-  const idToken = h.split('Bearer ')[1];
+  const idToken = authHeader.split('Bearer ')[1];
   try {
-    return await adminAuth.verifyIdToken(idToken);
+    const decoded = await adminAuth.verifyIdToken(idToken);
+    return decoded;
   } catch {
     res.status(401).end('Unauthorized');
     return null;
