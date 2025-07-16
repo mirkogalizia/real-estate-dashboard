@@ -1,5 +1,6 @@
-// File: src/lib/middleware.ts
+// src/lib/middleware.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
+// Da qui: src/lib → lo stesso livello
 import { adminAuth } from './firebaseAdmin';
 
 export async function verifyIdToken(req: NextApiRequest, res: NextApiResponse) {
