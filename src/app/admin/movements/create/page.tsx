@@ -1,6 +1,5 @@
-// File: src/app/admin/movements/create/page.tsx
-
 'use client';
+import { Suspense } from 'react';
 import AdminMenu from '../../Menu';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
@@ -17,7 +16,7 @@ interface Category { id: string; name: string; subcategories: string[]; type: 'i
 
 type MovementType = 'income' | 'expense';
 
-export default function CreateMovementPage() {
+function CreateMovementInner() {
   const router = useRouter();
   const params = useSearchParams();
   const paramType = params?.get('type');
@@ -186,6 +185,14 @@ export default function CreateMovementPage() {
         </motion.div>
       </main>
     </>
+  );
+}
+
+export default function CreateMovementPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CreateMovementInner />
+    </Suspense>
   );
 }
 
