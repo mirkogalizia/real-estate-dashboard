@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import AdminMenu from '../Menu';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,6 @@ interface Unit { id: string; name: string; address: string; purchaseCost: number
 interface Owner { id: string; name: string; }
 
 export default function AdminUnitsPage() {
-  const ownerInputRef = useRef<HTMLInputElement>(null);
   const [units, setUnits] = useState<Unit[]>([]);
   const [ownersMap, setOwnersMap] = useState<Record<string,string>>({});
   const [search, setSearch] = useState('');
@@ -82,11 +81,11 @@ export default function AdminUnitsPage() {
             <Input placeholder="Address" value={address} onChange={e=>setAddress(e.target.value)}/>
             <Input type="number" placeholder="Purchase Cost" value={purchaseCost} onChange={e=>setPurchaseCost(e.target.value)}/>
             <div className="relative">
-              <Input placeholder="Search Owner by name" value={ownerQuery} onChange={e=>{setOwnerQuery(e.target.value);setSelectedOwner(null);}} ref={ownerInputRef}/>
+              <Input placeholder="Search Owner by name" value={ownerQuery} onChange={e=>{setOwnerQuery(e.target.value);setSelectedOwner(null);}} />
               {ownerSuggestions.length>0&&(
                 <ul className="absolute z-20 bg-white border rounded-md w-full mt-1 max-h-48 overflow-auto">
                   {ownerSuggestions.map(o=>(
-                    <li key={o.id} className="px-3 py-1 hover:bg-gray-100 cursor-pointer" onMouseDown={e=>{e.preventDefault();setSelectedOwner(o);setOwnerQuery(o.name);setOwnerSuggestions([]);ownerInputRef.current?.blur();}}>{o.name}</li>
+                    <li key={o.id} className="px-3 py-1 hover:bg-gray-100 cursor-pointer" onMouseDown={e=>{e.preventDefault();setSelectedOwner(o);setOwnerQuery(o.name);setOwnerSuggestions([]);}}>{o.name}</li>
                   ))}
                 </ul>
               )}
