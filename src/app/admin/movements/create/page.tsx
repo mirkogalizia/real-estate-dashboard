@@ -1,3 +1,5 @@
+// File: src/app/admin/movements/create/page.tsx
+
 'use client';
 import AdminMenu from '../../Menu';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -18,7 +20,7 @@ type MovementType = 'income' | 'expense';
 export default function CreateMovementPage() {
   const router = useRouter();
   const params = useSearchParams();
-  const paramType = params.get('type');
+  const paramType = params?.get('type');
   const type: MovementType =
     paramType === 'in'
       ? 'income'
