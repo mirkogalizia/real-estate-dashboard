@@ -1,8 +1,8 @@
 // pages/api/properties/index.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-// DA qui: pages/api/properties → su di 2 livelli per arrivare alla root, poi src/lib
-import { adminDb } from '../../src/lib/firebaseAdmin';
-import { verifyIdToken } from '../../src/lib/middleware';
+// Risali tre livelli per arrivare a src/lib
+import { adminDb } from '../../../src/lib/firebaseAdmin';
+import { verifyIdToken } from '../../../src/lib/middleware';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const user = await verifyIdToken(req, res);
