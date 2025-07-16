@@ -1,4 +1,3 @@
-// File: src/app/admin/movements/create/page.tsx
 'use client';
 import AdminMenu from '../../Menu';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -20,7 +19,12 @@ export default function CreateMovementPage() {
   const router = useRouter();
   const params = useSearchParams();
   const paramType = params.get('type');
-  const type: MovementType = paramType === 'in' ? 'income' : 'expense';
+  const type: MovementType =
+    paramType === 'in'
+      ? 'income'
+      : paramType === 'out'
+        ? 'expense'
+        : 'expense'; // fallback
 
   const [units, setUnits] = useState<Unit[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -104,7 +108,7 @@ export default function CreateMovementPage() {
               </h2>
             </div>
             <CardContent className="p-6 space-y-4">
-              {/** Unit Select */}
+              {/* Unit Select */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium">Unit</label>
                 <select
@@ -118,7 +122,7 @@ export default function CreateMovementPage() {
                   ))}
                 </select>
               </div>
-              {/** Category Select */}
+              {/* Category Select */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium">Category</label>
                 <select
@@ -132,7 +136,7 @@ export default function CreateMovementPage() {
                   ))}
                 </select>
               </div>
-              {/** Subcategory Select */}
+              {/* Subcategory Select */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium">Subcategory</label>
                 <select
@@ -147,7 +151,7 @@ export default function CreateMovementPage() {
                   ))}
                 </select>
               </div>
-              {/** Amount Input */}
+              {/* Amount Input */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium">Amount (€)</label>
                 <Input
@@ -157,7 +161,7 @@ export default function CreateMovementPage() {
                   onChange={e => setAmount(e.target.value)}
                 />
               </div>
-              {/** Date Input */}
+              {/* Date Input */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium">Date</label>
                 <Input
