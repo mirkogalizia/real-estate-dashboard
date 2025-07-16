@@ -1,8 +1,7 @@
 // pages/api/properties/index.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-// Risali tre livelli per arrivare a src/lib
-import { adminDb } from '../../../src/lib/firebaseAdmin';
-import { verifyIdToken } from '../../../src/lib/middleware';
+import { adminDb } from '@/lib/firebaseAdmin';
+import { verifyIdToken } from '@/lib/middleware';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const user = await verifyIdToken(req, res);
@@ -45,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(204).end();
   }
 
-  res.setHeader('Allow', ['GET','POST','DELETE']);
+  res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
   res.status(405).end(`Method ${method} Not Allowed`);
 }
 
