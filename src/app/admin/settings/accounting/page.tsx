@@ -271,7 +271,6 @@ export default function AdminAccountingPage() {
                             <span className="ml-2 text-green-500 font-bold">✓</span>
                           ) : (
                             <Button
-                              size="sm"
                               variant="outline"
                               onClick={() => setSelectedSub(s)}
                               className="ml-2 px-2 py-1 text-xs"
