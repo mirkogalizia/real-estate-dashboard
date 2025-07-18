@@ -272,7 +272,7 @@ export default function AdminAccountingPage() {
                           ) : (
                             <Button
                               size="sm"
-                              variant="ghost"
+                              variant="outline"
                               onClick={() => setSelectedSub(s)}
                               className="ml-2 px-2 py-1 text-xs"
                             >Seleziona</Button>
