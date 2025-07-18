@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Combobox } from '@/components/ui/combobox';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, doc, updateDoc, arrayUnion, arrayRemove, deleteDoc } from 'firebase/firestore';
 import { motion } from 'framer-motion';
@@ -16,19 +17,16 @@ interface Category {
 }
 
 export default function AdminAccountingPage() {
+  // Stato e hooks
   const [categories, setCategories] = useState<Category[]>([]);
-  const [categoryType, setCategoryType] = useState<'income' | 'expense'>('expense');
-  const [categoryId, setCategoryId] = useState('new');
-  const [newName, setNewName] = useState('');
-  const [newSubs, setNewSubs] = useState('');
-  const [newType, setNewType] = useState<'income' | 'expense'>('expense');
+  const [type, setType] = useState<'income' | 'expense'>('expense');
+  const [categoryId, setCategoryId] = useState<string>('');
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [addSub, setAddSub] = useState('');
+  const [selectedSub, setSelectedSub] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  // Sottocategoria
-  const [addSub, setAddSub] = useState('');
-  const [addSubError, setAddSubError] = useState<string | null>(null);
-  const [selectedSub, setSelectedSub] = useState('');
-  
+  // Carica categorie da Firestore
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -39,40 +37,30 @@ export default function AdminAccountingPage() {
     setCategories(list);
   }
 
-  // Crea categoria nuova
-  const handleSave = async () => {
-    if (categoryId !== 'new') {
-      setError('Per creare una nuova categoria scegli "Nuova categoria"');
+  // Aggiungi nuova categoria
+  async function handleSaveCategory() {
+    if (!newCategoryName.trim()) {
+      setError('Nome categoria obbligatorio');
       return;
     }
-    if (!newName.trim()) {
-      setError('Category name is required');
-      return;
-    }
-    const subs = newSubs
-      .split(',')
-      .map(s => s.trim())
-      .filter(s => s);
     try {
       await addDoc(collection(db, 'categories'), {
-        name: newName.trim(),
-        subcategories: subs,
-        type: newType,
+        name: newCategoryName.trim(),
+        subcategories: [],
+        type,
       });
-      setNewName('');
-      setNewSubs('');
+      setNewCategoryName('');
       setError(null);
       await fetchCategories();
     } catch (e) {
-      console.error(e);
-      setError('Failed to save category');
+      setError('Errore creazione categoria');
     }
-  };
+  }
 
   // Aggiungi sottocategoria
-  const handleAddSub = async () => {
-    if (!addSub.trim()) {
-      setAddSubError('Sottocategoria obbligatoria');
+  async function handleAddSub() {
+    if (!addSub.trim() || !categoryId) {
+      setError('Sottocategoria obbligatoria e seleziona categoria');
       return;
     }
     try {
@@ -81,27 +69,26 @@ export default function AdminAccountingPage() {
         subcategories: arrayUnion(addSub.trim())
       });
       setAddSub('');
-      setAddSubError(null);
+      setError(null);
       await fetchCategories();
     } catch (e) {
-      console.error(e);
-      setAddSubError('Errore aggiunta sottocategoria');
+      setError('Errore aggiunta sottocategoria');
     }
-  };
+  }
 
   // Elimina categoria
-  const handleDeleteCategory = async (id: string, name: string) => {
-    if (!confirm(`Eliminare la categoria "${name}"? Verranno rimosse anche tutte le sue sottocategorie.`)) return;
+  async function handleDeleteCategory(id: string, name: string) {
+    if (!confirm(`Eliminare la categoria "${name}"?`)) return;
     try {
       await deleteDoc(doc(db, 'categories', id));
       setCategories(categories.filter(c => c.id !== id));
     } catch (e) {
       alert('Errore eliminazione categoria');
     }
-  };
+  }
 
   // Elimina sottocategoria
-  const handleDeleteSub = async (catId: string, sub: string) => {
+  async function handleDeleteSub(catId: string, sub: string) {
     if (!confirm(`Eliminare la sottocategoria "${sub}"?`)) return;
     try {
       const ref = doc(db, 'categories', catId);
@@ -110,12 +97,21 @@ export default function AdminAccountingPage() {
     } catch (e) {
       alert('Errore eliminazione sottocategoria');
     }
-  };
+  }
 
-  // Filtra categorie per tipo (expense/income)
-  const filteredCategories = categories.filter(c => c.type === categoryType);
-
-  const selectedCategory = categories.find(c => c.id === categoryId);
+  // Solo categorie del tipo selezionato
+  const filteredCategories = categories.filter(c => c.type === type);
+  // Opzioni per il combobox
+  const categoryOptions = filteredCategories.map(c => ({
+    value: c.id,
+    label: c.name
+  }));
+  // Sottocategorie della categoria selezionata
+  const selectedCategory = filteredCategories.find(c => c.id === categoryId);
+  const subOptions = (selectedCategory?.subcategories || []).map(sub => ({
+    value: sub,
+    label: sub
+  }));
 
   return (
     <>
@@ -168,29 +164,21 @@ export default function AdminAccountingPage() {
           </div>
         </div>
 
-        {/* Form: step type > category > subcategory */}
+        {/* Form UX migliorata per mobile */}
         <Card className="max-w-md w-full mx-auto shadow-lg rounded-2xl mb-6">
           <CardContent>
-            <h2 className="text-xl font-semibold mb-4 text-center">Nuova o Gestisci Categoria</h2>
+            <h2 className="text-xl font-semibold mb-4 text-center">Gestione Categoria</h2>
             <div className="space-y-4">
 
-              {/* Step 1: Income/Expense */}
+              {/* Tipo: Entrata o Spesa */}
               <div className="flex justify-center gap-4 mb-2">
                 <label className="flex items-center">
                   <input
                     type="radio"
                     name="main-type"
                     value="expense"
-                    checked={categoryType === 'expense'}
-                    onChange={() => {
-                      setCategoryType('expense');
-                      setCategoryId('new');
-                      setAddSub('');
-                      setSelectedSub('');
-                      setNewName('');
-                      setNewSubs('');
-                      setError(null);
-                    }}
+                    checked={type === 'expense'}
+                    onChange={() => { setType('expense'); setCategoryId(''); setSelectedSub(''); }}
                     className="mr-2"
                   />
                   Spesa
@@ -200,105 +188,61 @@ export default function AdminAccountingPage() {
                     type="radio"
                     name="main-type"
                     value="income"
-                    checked={categoryType === 'income'}
-                    onChange={() => {
-                      setCategoryType('income');
-                      setCategoryId('new');
-                      setAddSub('');
-                      setSelectedSub('');
-                      setNewName('');
-                      setNewSubs('');
-                      setError(null);
-                    }}
+                    checked={type === 'income'}
+                    onChange={() => { setType('income'); setCategoryId(''); setSelectedSub(''); }}
                     className="mr-2"
                   />
                   Entrata
                 </label>
               </div>
 
-              {/* Step 2: select categoria */}
-              <select
-                className="w-full p-2 border rounded"
+              {/* Combobox Categoria */}
+              <Combobox
+                options={[{ value: '', label: '+ Nuova categoria' }, ...categoryOptions]}
                 value={categoryId}
-                onChange={e => {
-                  setCategoryId(e.target.value);
-                  setNewName('');
-                  setNewSubs('');
-                  setAddSub('');
-                  setSelectedSub('');
-                  setError(null);
-                  setAddSubError(null);
-                }}
-              >
-                <option value="new">+ Nuova categoria</option>
-                {filteredCategories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
+                onChange={v => setCategoryId(v)}
+                placeholder="Scegli o cerca categoria"
+              />
 
-              {/* Step 3a: nuova categoria */}
-              {categoryId === 'new' && (
-                <>
+              {/* Se + Nuova categoria, mostra input per aggiungere */}
+              {categoryId === '' && (
+                <div className="flex flex-row gap-2">
                   <Input
                     placeholder="Nome categoria"
-                    value={newName}
-                    onChange={e => setNewName(e.target.value)}
+                    value={newCategoryName}
+                    onChange={e => setNewCategoryName(e.target.value)}
+                    className="flex-1"
                   />
-                  <Input
-                    placeholder="Sottocategorie (separate da virgola)"
-                    value={newSubs}
-                    onChange={e => setNewSubs(e.target.value)}
-                  />
-                  <div className="flex justify-end">
-                    <Button onClick={handleSave} className="w-full">
-                      Crea categoria
-                    </Button>
-                  </div>
-                  {error && <p className="text-red-500 text-center">{error}</p>}
-                </>
+                  <Button onClick={handleSaveCategory}>
+                    Salva
+                  </Button>
+                </div>
               )}
 
-              {/* Step 3b: gestisci sottocategorie di una categoria esistente */}
-              {categoryId !== 'new' && selectedCategory && (
+              {/* Sottocategorie */}
+              {categoryId && selectedCategory && (
                 <>
-                  <div>
-                    <div className="text-sm font-semibold mb-1">Sottocategorie:</div>
-                    <ul className="list-disc list-inside text-sm text-gray-600 mb-2">
-                      {selectedCategory.subcategories.map((s, idx) => (
-                        <li key={idx} className="flex items-center">
-                          <span>{s}</span>
-                          {selectedSub === s ? (
-                            <span className="ml-2 text-green-500 font-bold">✓</span>
-                          ) : (
-                            <Button
-                              variant="outline"
-                              onClick={() => setSelectedSub(s)}
-                              className="ml-2 px-2 py-1 text-xs"
-                            >Seleziona</Button>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="flex">
+                  <Combobox
+                    options={subOptions}
+                    value={selectedSub}
+                    onChange={v => setSelectedSub(v)}
+                    placeholder="Scegli sottocategoria"
+                  />
+                  <div className="flex flex-row gap-2">
                     <Input
                       placeholder="Aggiungi sottocategoria"
                       value={addSub}
                       onChange={e => setAddSub(e.target.value)}
                       className="flex-1"
                     />
-                    <Button onClick={handleAddSub} className="ml-2 px-4">
+                    <Button onClick={handleAddSub}>
                       Aggiungi
                     </Button>
                   </div>
-                  {addSubError && <p className="text-red-500 text-center">{addSubError}</p>}
-                  {selectedSub && (
-                    <div className="mt-2 text-sm text-green-700">
-                      Sottocategoria selezionata: <strong>{selectedSub}</strong>
-                    </div>
-                  )}
                 </>
               )}
+
+              {error && <p className="text-red-500 text-center">{error}</p>}
             </div>
           </CardContent>
         </Card>
